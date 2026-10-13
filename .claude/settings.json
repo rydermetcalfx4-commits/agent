@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/scrape_self.sh\" >/dev/null 2>&1; cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet -- self/inventory.md 2>/dev/null || echo 'self/inventory.md changed since last generation; consider /evolve.'"
+          }
+        ]
+      }
+    ]
+  }
+}
