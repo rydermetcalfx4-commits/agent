@@ -15,6 +15,7 @@ skill_line() { # path/to/SKILL.md -> "- name: description"
   echo "- \`${name:-$(basename "$(dirname "$f")")}\`: ${desc}"
 }
 
+missing=()
 {
   echo "# Self inventory"
   echo
@@ -24,11 +25,17 @@ skill_line() { # path/to/SKILL.md -> "- name: description"
   echo "- Claude Code: $(claude --version 2>/dev/null | head -1 || echo unknown)"
   echo "- OS: $(uname -sr)"
   echo "- Remote session: $([ -n "${CLAUDE_CODE_REMOTE:-}" ] && echo yes || echo unknown)"
+  echo "- HolyClaude container: $([ -f "$HOME/.claude/.holyclaude-bootstrapped" ] && echo yes || echo no)"
   echo
   echo "## CLI tools on PATH"
-  for t in git gh gcloud bq node npm python3 pip uv go cargo rustc docker rg jq curl firecrawl playwright; do
-    if p=$(command -v "$t" 2>/dev/null); then echo "- \`$t\`"; fi
+  # list mirrors HolyClaude's toolset so the inventory shows what's missing vs. a full workstation
+  for t in git gh gcloud bq node npm pnpm tsc vite python3 pip uv go cargo rustc docker rg fdfind fzf jq yq curl wget \
+           ffmpeg pandoc convert vips sqlite3 psql redis-cli chromium firecrawl playwright yt-dlp soffice \
+           gemini codex cursor opencode task-master vercel wrangler netlify desloppify; do
+    if command -v "$t" >/dev/null 2>&1; then echo "- \`$t\`"; else missing+=("$t"); fi
   done
+  echo
+  echo "Missing: ${missing[*]:-none}"
   echo
   echo "## Plugins (synced)"
   for m in "$CLAUDE_HOME"/plugins/synced/*/manifest.json; do
@@ -44,6 +51,10 @@ skill_line() { # path/to/SKILL.md -> "- name: description"
   echo
   echo "## Project skills (.claude/skills)"
   find "$ROOT/.claude/skills" -maxdepth 2 -name SKILL.md 2>/dev/null | sort | while read -r f; do skill_line "$f"; done
+  echo
+  echo "## Catalog (on-demand, not auto-loaded)"
+  echo "- Composio app playbooks: $(find "$ROOT/catalog/composio" -name '*.md' ! -name INDEX.md 2>/dev/null | wc -l | tr -d ' ') (use /app-automation)"
+  echo "- External skill links: $(grep -c '^- \[' "$ROOT/catalog/external-skills.md" 2>/dev/null || echo 0)"
   echo
   echo "## MCP servers declared by plugins"
   find "$CLAUDE_HOME/plugins/synced" -name .mcp.json 2>/dev/null | sort | while read -r f; do

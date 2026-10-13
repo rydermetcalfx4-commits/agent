@@ -8,12 +8,18 @@ loads these files, so improving them improves the next me.
 - `memory/learnings.md` — declarative memory: dated, one-line lessons. Read it at the start of non-trivial work.
 - `.claude/skills/` — procedural memory. `/evolve` runs one generation of the loop.
 - `EVOLUTION.md` — generation log with a falsifiable hypothesis per generation.
+- `memory/failures.log` — raw tool failures, appended automatically by a PostToolUseFailure hook. `/evolve` turns them into lessons, then clears it.
+- `catalog/` — knowledge loaded on demand, not every session: 800+ Composio app playbooks (`/app-automation`), an index of external skills, a skill template.
+- `holyclaude/` — run this repo inside the HolyClaude Docker workstation (`docker compose up -d` there); its environment notes are in `holyclaude/environment-*.md`.
+- `scripts/import_sources.sh` — re-scrapes upstream sources (see `THIRD_PARTY.md`) and refreshes vendored skills and catalog.
 
 ## Always-on rules
 - **Check before acting**: before a non-trivial task, read `memory/learnings.md` and apply any relevant lesson.
 - **Learn from friction**: when a step fails or needs a workaround, fix it, then add a one-line dated lesson to `memory/learnings.md` (or a `## Gotchas` entry in the skill that hit it).
 - **Grow skills**: when the same multi-step workflow shows up 3+ times, write a skill for it in `.claude/skills/`.
 - **Trust the inventory, verify it**: prefer tools listed in `self/inventory.md`; if one is listed but broken, record that as a lesson.
+- **Look before building**: before writing a new skill, check `.claude/skills/`, `catalog/external-skills.md`, and built-in skills for one that already does it.
+- **Act, don't draft**: when the user wants something done in an external app, use `/app-automation` (or a first-party connector) instead of writing instructions.
 - **Evolve at session end** when the session produced lessons: run `/evolve`.
 
 ## Invariants (never mutate these away)

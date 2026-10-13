@@ -1,0 +1,31 @@
+# Run this agent repo inside HolyClaude (https://github.com/CoderLuii/HolyClaude):
+# Claude Code + web UI + headless Chromium + 50+ dev tools, with this repo as the workspace.
+#
+#   cd holyclaude && docker compose up -d
+#   open http://localhost:3001  (sign in with your Claude plan or API key)
+#
+# Based on HolyClaude's own docker-compose.yaml; only the volume paths differ.
+services:
+  holyclaude:
+    image: coderluii/holyclaude:latest
+    container_name: agent-holyclaude
+    hostname: holyclaude
+    restart: unless-stopped
+    shm_size: 2g                 # Chromium crashes with Docker's default 64MB
+    network_mode: bridge
+    cap_add:
+      - SYS_ADMIN                # required by HolyClaude's browser profile
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined       # required by HolyClaude's browser profile
+    ports:
+      - "127.0.0.1:3001:3001"    # web UI, localhost only
+    volumes:
+      - ./data/claude:/home/claude/.claude   # credentials + settings persist here; keep it private
+      - ..:/workspace/agent                  # this repo
+    working_dir: /workspace/agent
+    environment:
+      - TZ=UTC
+      # Optional push notifications (also enable with: touch data/claude/notify-on)
+      # - NOTIFY_DISCORD=discord://webhook_id/webhook_token
+      # - NOTIFY_TELEGRAM=tgram://bot_token/chat_id

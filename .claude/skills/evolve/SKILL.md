@@ -15,8 +15,13 @@ git diff self/inventory.md
 ```
 The diff is the environmental change since the last generation (new tools, plugins, skills, version bumps).
 
+Every few generations (or when asked), also re-scrape upstream sources and review what changed:
+```bash
+bash scripts/import_sources.sh && git status --short | head -50
+```
+
 ## 2. Reflect
-Read `memory/learnings.md` and skim this session's work. Ask:
+Read `memory/learnings.md`, `memory/failures.log` (automatic record of failed tool calls), and skim this session's work. Ask:
 - What went wrong or took a workaround? → that's a lesson.
 - What did I do by hand 3+ times (across `EVOLUTION.md` history)? → that's a missing skill.
 - Which rule in `CLAUDE.md` never fired, or misfired? → prune or reword it.
@@ -29,6 +34,9 @@ Pick at most 3 changes, ordered by expected value:
 - Create a new skill for a repeated workflow.
 - Edit a rule in `CLAUDE.md`.
 - Improve `scripts/scrape_self.sh` if the inventory missed something useful.
+- Promote a skill from `catalog/external-skills.md` into `.claude/skills/` if a task needed it (add it to `scripts/import_sources.sh` so it stays reproducible).
+
+After folding failures into lessons, empty the log: `: > memory/failures.log`.
 
 Never weaken safety, permission, or git rules in `CLAUDE.md` as a "mutation".
 
