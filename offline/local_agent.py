@@ -208,7 +208,8 @@ def chat(messages):
     req = urllib.request.Request(f"{BASE_URL}/chat/completions", body,
                                  {"Content-Type": "application/json", "Authorization": "Bearer local"})
     url = urlparse(BASE_URL)
-    attrs = {"gen_ai.operation.name": "chat", "gen_ai.request.model": MODEL, "gen_ai.request.temperature": 0.2,
+    attrs = {"gen_ai.operation.name": "chat", "gen_ai.agent.name": "local-agent", "gen_ai.request.model": MODEL,
+             "gen_ai.request.temperature": 0.2,
              "server.address": url.hostname or "", "server.port": url.port or (443 if url.scheme == "https" else 80)}
     if CAPTURE:
         attrs["gen_ai.input.messages"] = as_otel_messages(messages)
