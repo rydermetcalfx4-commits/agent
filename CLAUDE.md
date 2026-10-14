@@ -14,6 +14,8 @@ loads these files, so improving them improves the next me.
 - `sources.json` / `sources.lock` / `scripts/import_sources.py` — upstream sources, pinned revisions, and the importer. `THIRD_PARTY.md` — provenance.
 - `mods/evolving-agent/` — this agent cloned as an installable Claude Code mod (TypeScript hooks + skills); `.claude-plugin/marketplace.json`
   makes the repo its marketplace. Keep it in sync when the core loop changes; test with `claude plugin test mods/evolving-agent`.
+- `offline/` — running an agent like this offline: a guide (Claude Code on Ollama, own agent loop, own model) and
+  `local_agent.py`, a stdlib-only agent loop for any OpenAI-compatible local server (tests: `python3 offline/test_local_agent.py`).
 - `research/` — notes from scraping the ecosystem. `holyclaude/` — run this repo in the HolyClaude Docker workstation.
 - `EVOLUTION.md` — generation log with a falsifiable hypothesis per generation.
 

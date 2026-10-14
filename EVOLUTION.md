@@ -61,3 +61,18 @@
   - Portable lessons seeded into the mod's template; repo-specific ones left behind.
 - Hypothesis: installed in a second project, the mod produces a non-empty `.evolving-agent/failures.log` within its first real
   session, and that project's first `/evolve` turns it into a lesson.
+
+## Generation 6 — 2026-10-14
+- Environment diff: +`offline/` (guide, `local_agent.py`, 6 tests), +`catalog/external/ai-projects.md`, +`research/offline-ai-2026-10.md`.
+- Previous hypothesis (gen 5, the mod in a second project): untested. But the mod did load in this repo, seeded `.evolving-agent/`,
+  and the repo's own skill-usage hook logged real entries, confirming the second half of gen 3's hypothesis.
+- Source: scraped AMAI-GmbH/AI-Expert-Roadmap, Lightning-AI/pytorch-lightning, and the 500-AI-projects list (via `integrate-source`),
+  then researched offline agents. ollama.com was blocked, so claims were verified against Ollama's own repo docs instead.
+- Mutations:
+  - `offline/local_agent.py`: a from-scratch agent loop for local models that shares this repo's lessons, guard, and failure log,
+    so mistakes made offline feed `/evolve` too.
+  - Guide with three levels (Claude Code on Ollama → own loop → own model) and a learning path through nanoGPT,
+    LLMs-from-scratch, the Lightning LM example, and nanochat.
+  - 2 lessons: model weights are unreachable here (test with fakes); a project's own repo is a fallback for blocked docs sites.
+- Hypothesis: when the user runs `local_agent.py` on a real local model, its first failures land in `memory/failures.log`
+  and the next `/evolve` turns at least one into a lesson specific to local models.

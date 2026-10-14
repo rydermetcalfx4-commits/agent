@@ -4,11 +4,12 @@ Format: `- [confidence] YYYY-MM-DD — lesson`. Confidence 0.3 tentative … 0.9
 Re-observed → +0.1; contradicted → −0.2; below 0.3 → drop. Lessons at ≥ 0.7 are injected at session start.
 Keep under 60 lines; merge or drop stale ones. (Confidence model from ECC continuous-learning-v2.)
 
+- [0.6] 2026-10-14 — Model weights can't be fetched in cloud sessions (huggingface.co, ollama.com, GitHub releases blocked; PyPI works). Test model-facing code against a scripted fake server instead.
 - [0.7] 2026-10-14 — Mod API: one unmatched hook per event (merge guard + logger), `$` op hooks answer `{ value }` / `{ deny }`, the engine passes absolute paths, and the test `$` takes full event inputs. Validate, tsc, and `claude plugin test` before shipping.
 - [0.7] 2026-10-14 — Run `python3 scripts/doctor.py` after any change to skills, lessons, or hooks; it caught a dangling reference in a brand-new skill.
 - [0.8] 2026-10-14 — Guards must parse commands per segment and skip heredocs/messages; grepping the whole string blocked my own commit (prose mentioned `.env`). Hook edits to .claude/settings.json can take effect mid-session.
 - [0.9] 2026-10-14 — GitHub search (web and API) is blocked in cloud sessions; discover repos via WebSearch, then `git clone --depth 1` (public clones work).
-- [0.8] 2026-10-14 — Egress policy blocks many third-party sites (e.g. githublb.vercel.app); when WebFetch/curl gets 403 or ENOTFOUND, switch sources, don't retry.
+- [0.9] 2026-10-14 — Egress policy blocks many third-party sites (githublb.vercel.app, ollama.com); a project's own GitHub repo usually clones and carries its docs; when WebFetch/curl gets 403 or ENOTFOUND, switch sources, don't retry.
 - [1.0] 2026-10-14 — Vendoring third-party skill dirs into .claude/skills is blocked by the auto-mode classifier even after a vague "do whatever"; it needs explicit approval of that specific import (or a user permission rule). Re-observed twice.
 - [0.8] 2026-10-14 — Hook logs must collapse newlines in every field (command and error), or multi-line commands corrupt one-line logs.
 - [0.7] 2026-10-14 — Skill descriptions route on their first ~60 chars; lead with when-to-use.
