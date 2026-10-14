@@ -23,7 +23,7 @@ path, so they inherit it. Keep it short: who you are, skills/assets, time and bu
 (ideal customer), price, channels, and a dated **Decisions & results** log at the bottom. Append to that log at the end of every stage.
 
 ## Stages (do the one the user is at; ask if unclear)
-1. **Profile.** Skills, existing audience or network, hours/week, budget, risk tolerance, how soon money is needed.
+1. **Profile.** Ask the experience level for each skill named ("interested in" vs "have done it" vs "paid for it"). Skills, existing audience or network, hours/week, budget, risk tolerance, how soon money is needed.
    Write the context doc.
 2. **Pick a model.** Recommend 1–2 of the following, matched to the profile, each with a one-line why and the fastest
    first dollar. Fastest-to-cash usually means services first, products later.
