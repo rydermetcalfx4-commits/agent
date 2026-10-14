@@ -1,0 +1,254 @@
+<title>Money Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a ledger. Totals strip on top, then one tab at a time (Ventures · Pipeline · Income), forms tucked under each list. */
+:root {
+  --bg: #F3F5F7; --surface: #FFFFFF; --ink: #16202B; --muted: #5B6875; --line: #DCE2E8;
+  --accent: #A8651A; --accent-ink: #FFFFFF; --good: #1F7A4D; --warn: #A15C00; --bad: #B3261E; --chip: #E8EDF2;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0F151C; --surface: #17202A; --ink: #E6ECF2; --muted: #93A1AF; --line: #2A3643;
+  --accent: #E0A050; --accent-ink: #1A1206; --good: #5CC08C; --warn: #E3A54A; --bad: #F08A80; --chip: #222E3A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0F151C; --surface: #17202A; --ink: #E6ECF2; --muted: #93A1AF; --line: #2A3643;
+  --accent: #E0A050; --accent-ink: #1A1206; --good: #5CC08C; --warn: #E3A54A; --bad: #F08A80; --chip: #222E3A; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); }
+.wrap { max-width: 760px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1 { font: 700 30px/1.1 var(--display); margin: 0; letter-spacing: -0.01em; text-wrap: balance }
+.sub { color: var(--muted); margin: 4px 0 18px; font-size: 14px }
+.totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+.tot { background: var(--surface); padding: 12px 14px; min-width: 0 }
+.tot b { display: block; font: 500 20px/1.2 var(--mono); font-variant-numeric: tabular-nums }
+.tot span { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted) }
+@media (max-width: 520px) { .totals { grid-template-columns: repeat(2, 1fr) } }
+.tabs { display: flex; gap: 6px; margin: 22px 0 12px; flex-wrap: wrap }
+.tabs button { font: 600 14px var(--body); padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.list { display: grid; gap: 8px }
+.row { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; min-width: 0 }
+.row-top { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; flex-wrap: wrap }
+.row h3 { margin: 0; font: 600 16px var(--body); min-width: 0; overflow-wrap: anywhere }
+.meta { color: var(--muted); font-size: 13px; overflow-wrap: anywhere }
+.money { font: 500 15px var(--mono); font-variant-numeric: tabular-nums }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--chip); color: var(--ink); white-space: nowrap }
+.chip.good { color: var(--good) } .chip.warn { color: var(--warn) } .chip.bad { color: var(--bad) } .chip.ex { color: var(--accent) }
+.stages { display: flex; gap: 3px } .stages i { height: 4px; flex: 1; border-radius: 2px; background: var(--line) } .stages i.on { background: var(--accent) }
+.actions { display: flex; gap: 6px; flex-wrap: wrap }
+.actions select, .actions button { font: 13px var(--body); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink) }
+.actions .del { color: var(--bad); cursor: pointer }
+details.add { margin-top: 12px; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 14px }
+details.add summary { cursor: pointer; font-weight: 600; color: var(--accent) }
+form { display: grid; gap: 10px; margin-top: 10px; grid-template-columns: 1fr 1fr }
+form .full { grid-column: 1 / -1 }
+@media (max-width: 520px) { form { grid-template-columns: 1fr } }
+label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); font-weight: 500; min-width: 0 }
+input, select, textarea { font: 15px var(--body); padding: 8px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; min-width: 0 }
+.primary { font: 600 14px var(--body); padding: 10px 14px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); cursor: pointer; justify-self: start }
+.empty { color: var(--muted); padding: 18px; text-align: center; border: 1px dashed var(--line); border-radius: 10px; background: var(--surface) }
+.status { font-size: 13px; color: var(--muted); min-height: 1.4em; margin-top: 8px }
+.note { margin-top: 28px; font-size: 13px; color: var(--muted); max-width: 65ch }
+code { font: 12.5px var(--mono); background: var(--chip); padding: 1px 5px; border-radius: 4px }
+</style>
+
+<div class="wrap">
+  <h1>Money Board</h1>
+  <p class="sub">Every idea, every pitch, every dollar. Run <code>/make-money</code> in a session and Claude reads and updates this board.</p>
+
+  <section class="totals" aria-label="Totals">
+    <div class="tot"><b id="t-month">$0</b><span>Earned this month</span></div>
+    <div class="tot"><b id="t-all">$0</b><span>Earned all-time</span></div>
+    <div class="tot"><b id="t-open">0</b><span>Open deals</span></div>
+    <div class="tot"><b id="t-pipe">$0</b><span>Pipeline value</span></div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" id="tab-ventures" aria-selected="true" data-tab="ventures">Ventures</button>
+    <button role="tab" id="tab-deals" aria-selected="false" data-tab="deals">Pipeline</button>
+    <button role="tab" id="tab-income" aria-selected="false" data-tab="income">Income</button>
+  </nav>
+
+  <section id="p-ventures">
+    <div class="list" id="ventures"><div class="empty">Loading your ventures…</div></div>
+    <details class="add"><summary>Add a venture</summary>
+      <form id="f-venture">
+        <label class="full">Name<input id="v-name" required placeholder="e.g. 48-hour website audits for local dentists"></label>
+        <label>Model<select id="v-model">
+          <option>Freelance service</option><option>Productized service</option><option>Small-business automation</option>
+          <option>Digital product</option><option>Micro-SaaS</option><option>Content / audience</option><option>Ecommerce</option><option>Job / promotion</option></select></label>
+        <label>Stage<select id="v-stage"></select></label>
+        <label class="full">Next step<input id="v-next" placeholder="e.g. message 10 dentists from the local directory"></label>
+        <label class="full">Kill criterion (decide before testing)<input id="v-kill" placeholder="e.g. fewer than 2 of 10 say they'd pay $300"></label>
+        <button class="primary" type="submit">Add venture</button>
+      </form></details>
+  </section>
+
+  <section id="p-deals" hidden>
+    <div class="list" id="deals"></div>
+    <details class="add"><summary>Add a lead</summary>
+      <form id="f-deal">
+        <label>Who<input id="d-who" required placeholder="Name or business"></label>
+        <label>Venture<select id="d-venture"></select></label>
+        <label>Status<select id="d-status"></select></label>
+        <label>Value ($)<input id="d-value" type="number" min="0" step="1" inputmode="decimal" placeholder="300"></label>
+        <label class="full">Note<input id="d-note" placeholder="Where you found them, what they need"></label>
+        <button class="primary" type="submit">Add lead</button>
+      </form></details>
+  </section>
+
+  <section id="p-income" hidden>
+    <div class="list" id="income"></div>
+    <details class="add"><summary>Log income</summary>
+      <form id="f-income">
+        <label>Amount ($)<input id="i-amount" type="number" min="0" step="0.01" inputmode="decimal" required></label>
+        <label>Date<input id="i-date" type="date" required></label>
+        <label>Venture<select id="i-venture"></select></label>
+        <label>From<input id="i-source" placeholder="Client or platform"></label>
+        <button class="primary" type="submit">Log income</button>
+      </form></details>
+  </section>
+
+  <p class="status" id="status" role="status"></p>
+  <p class="note">Stages follow the <code>/make-money</code> playbook: idea → validating → offer → selling → running. Only record money that has actually arrived. Ask Claude to “update my money board” after a session and it will add what you did.</p>
+</div>
+
+<script>
+const STAGES = ["idea", "validating", "offer", "selling", "running", "dropped"];
+const DEAL = ["lead", "contacted", "replied", "call", "won", "lost"];
+const state = { ventures: [], deals: [], income: [] };
+let db = null, canWrite = true;
+const $ = (id) => document.getElementById(id);
+const money = (n) => "$" + (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
+const status = (t) => { $("status").textContent = t; };
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+function fillSelect(sel, values, current) { sel.replaceChildren(...values.map(v => { const o = el("option", null, v); o.value = v; if (v === current) o.selected = true; return o; })); }
+fillSelect($("v-stage"), STAGES.slice(0, 5), "idea");
+fillSelect($("d-status"), DEAL, "lead");
+$("i-date").value = new Date().toISOString().slice(0, 10);
+
+document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.setAttribute("aria-selected", x === b));
+  ["ventures", "deals", "income"].forEach(t => { $("p-" + t).hidden = t !== b.dataset.tab; });
+}));
+
+function ventureName(id) { const v = state.ventures.find(v => v.id === id); return v ? v.name : "—"; }
+
+function render() {
+  const now = new Date(), ym = now.toISOString().slice(0, 7);
+  $("t-month").textContent = money(state.income.filter(i => (i.date || "").startsWith(ym)).reduce((s, i) => s + (+i.amount || 0), 0));
+  $("t-all").textContent = money(state.income.reduce((s, i) => s + (+i.amount || 0), 0));
+  const open = state.deals.filter(d => !["won", "lost"].includes(d.status));
+  $("t-open").textContent = open.length;
+  $("t-pipe").textContent = money(open.reduce((s, d) => s + (+d.value || 0), 0));
+
+  const vOpts = ["—", ...state.ventures.map(v => v.id)];
+  for (const id of ["d-venture", "i-venture"]) {
+    const sel = $(id), cur = sel.value;
+    sel.replaceChildren(...vOpts.map(v => { const o = el("option", null, v === "—" ? "—" : ventureName(v)); o.value = v; return o; }));
+    if (vOpts.includes(cur)) sel.value = cur;
+  }
+
+  const vl = $("ventures");
+  vl.replaceChildren(...(state.ventures.length ? state.ventures.map(v => {
+    const r = el("article", "row"), top = el("div", "row-top"), h = el("h3", null, v.name);
+    const chips = el("div", "actions");
+    if (v.example) chips.append(el("span", "chip ex", "example"));
+    chips.append(el("span", "chip" + (v.stage === "running" ? " good" : v.stage === "dropped" ? " bad" : ""), v.stage));
+    top.append(h, chips);
+    const bar = el("div", "stages"); STAGES.slice(0, 5).forEach((s, i) => bar.append(el("i", i <= STAGES.indexOf(v.stage) && v.stage !== "dropped" ? "on" : "")));
+    r.append(top, bar, el("div", "meta", (v.model || "") + (v.next ? " · Next: " + v.next : "")));
+    if (v.kill) r.append(el("div", "meta", "Kill if: " + v.kill));
+    r.append(rowActions("ventures", v, "stage", STAGES));
+    return r;
+  }) : [el("div", "empty", "No ventures yet. Add your first idea below, or run /make-money and Claude will add it.")]));
+
+  const dl = $("deals");
+  const deals = [...state.deals].sort((a, b) => DEAL.indexOf(a.status) - DEAL.indexOf(b.status));
+  dl.replaceChildren(...(deals.length ? deals.map(d => {
+    const r = el("article", "row"), top = el("div", "row-top");
+    const right = el("div", "actions");
+    if (d.example) right.append(el("span", "chip ex", "example"));
+    right.append(el("span", "chip" + (d.status === "won" ? " good" : d.status === "lost" ? " bad" : d.status === "call" ? " warn" : ""), d.status), el("span", "money", money(d.value)));
+    top.append(el("h3", null, d.who), right);
+    r.append(top, el("div", "meta", ventureName(d.venture) + (d.note ? " · " + d.note : "")), rowActions("deals", d, "status", DEAL));
+    return r;
+  }) : [el("div", "empty", "No leads yet. Every person you pitch goes here, so you can see what converts.")]));
+
+  const il = $("income");
+  const inc = [...state.income].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  il.replaceChildren(...(inc.length ? inc.map(i => {
+    const r = el("article", "row"), top = el("div", "row-top");
+    top.append(el("h3", "money", money(i.amount)), el("span", "meta", i.date || ""));
+    r.append(top, el("div", "meta", [ventureName(i.venture), i.source].filter(Boolean).join(" · ")), rowActions("income", i));
+    return r;
+  }) : [el("div", "empty", "No income logged yet. Log a payment once it has actually arrived.")]));
+}
+
+function rowActions(coll, item, field, values) {
+  const a = el("div", "actions");
+  if (!canWrite) return a;
+  if (field) {
+    const sel = el("select"); sel.id = coll + "-" + item.id + "-" + field; sel.setAttribute("aria-label", "Change " + field);
+    fillSelect(sel, values, item[field]);
+    sel.addEventListener("change", () => write(() => db.doc(coll + "/" + item.id).update({ [field]: sel.value, updated: new Date().toISOString() }), "Updated."));
+    a.append(sel);
+  }
+  const del = el("button", "del", "Delete"); let armed = false;
+  del.addEventListener("click", () => {
+    if (!armed) { armed = true; del.textContent = "Tap again to delete"; setTimeout(() => { armed = false; del.textContent = "Delete"; }, 3000); return; }
+    write(() => db.doc(coll + "/" + item.id).delete(), "Deleted.");
+  });
+  a.append(del);
+  return a;
+}
+
+async function write(fn, ok) {
+  if (!db) { status("Saving needs you signed in to claude.ai."); return false; }
+  try { await fn(); status(ok); return true; }
+  catch (e) {
+    if (e && e.code === "invalid_argument") { canWrite = false; render(); status("You can view this board but not change it."); }
+    else if (e && e.code === "quota_exceeded") status("The board is full. Delete old entries to add new ones.");
+    else status("Couldn't save. Check your connection and try again.");
+    return false;
+  }
+}
+
+$("f-venture").addEventListener("submit", (e) => { e.preventDefault();
+  const body = { name: $("v-name").value.trim(), model: $("v-model").value, stage: $("v-stage").value, next: $("v-next").value.trim(), kill: $("v-kill").value.trim(), created: new Date().toISOString() };
+  if (!body.name) return;
+  write(() => db.collection("ventures").add(body), "Venture added.").then(ok => ok && e.target.reset());
+});
+$("f-deal").addEventListener("submit", (e) => { e.preventDefault();
+  const body = { who: $("d-who").value.trim(), venture: $("d-venture").value, status: $("d-status").value, value: +$("d-value").value || 0, note: $("d-note").value.trim(), updated: new Date().toISOString() };
+  if (!body.who) return;
+  write(() => db.collection("deals").add(body), "Lead added.").then(ok => ok && e.target.reset());
+});
+$("f-income").addEventListener("submit", (e) => { e.preventDefault();
+  const body = { amount: +$("i-amount").value || 0, date: $("i-date").value, venture: $("i-venture").value, source: $("i-source").value.trim() };
+  if (!body.amount) return;
+  write(() => db.collection("income").add(body), "Income logged.").then(ok => { if (ok) { e.target.reset(); $("i-date").value = new Date().toISOString().slice(0, 10); } });
+});
+
+render();
+(async () => {
+  db = await (window.claude?.use?.("db") ?? null);
+  const user = await (window.claude?.use?.("user") ?? null);
+  if (!db) { canWrite = false; render(); $("ventures").replaceChildren(el("div", "empty", "Sign in to claude.ai to see and edit your board.")); return; }
+  const can = user ? await user.can("data.write") : null;
+  if (can === false) canWrite = false;
+  for (const coll of ["ventures", "deals", "income"]) {
+    db.collection(coll).onSnapshot(
+      (snap) => { state[coll] = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
+      () => status("Live updates stopped. Reload the page to reconnect.")
+    );
+  }
+})();
+</script>

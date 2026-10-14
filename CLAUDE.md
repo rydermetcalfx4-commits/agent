@@ -17,6 +17,7 @@ loads these files, so improving them improves the next me.
 - `offline/` — running an agent like this offline: a guide (Claude Code on Ollama, own agent loop, own model) and
   `local_agent.py`, a stdlib-only agent loop for any OpenAI-compatible local server (tests: `python3 offline/test_local_agent.py`).
 - `observability/` — Honeycomb setup: `claude-code.env` exports Claude Code's own telemetry; `offline/honeycomb.env` traces the local agent.
+- `hq/` — source of the user's Money Board artifact (claude.ai/artifact/W5hQvKFsksev2nc718J8kD); `/hq` is the start-here menu, `/make-money` keeps the board in sync.
 - `research/` — notes from scraping the ecosystem. `holyclaude/` — run this repo in the HolyClaude Docker workstation.
 - `EVOLUTION.md` — generation log with a falsifiable hypothesis per generation.
 
