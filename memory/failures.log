@@ -1,2 +1,3 @@
 2026-10-14 | WebFetch | https://ollama.com/blog/claude | getaddrinfo ENOTFOUND ollama.com
 2026-10-14 | mcp__Honeycomb__run_query |  | unknown column or derived column "name" Columns this dataset declares for common attributes — prefer these when a query needs the concept: duration_ms: duration_ms error: error log_message: body log_s
+2026-10-14 | Bash | sed -n 171,220p scripts/import_sources.py; head -5 catalog/INDEX.tsv; wc -l catalog/INDEX.tsv | Exit code 1 def main(): ap = argparse.ArgumentParser() ap.add_argument("--update", action="store_true") ap.add_argument("--only", default="") a = ap.parse_args() only = set(filter(None, a.only.split("
