@@ -1,1 +1,2 @@
 2026-10-14 | WebFetch | https://ollama.com/blog/claude | getaddrinfo ENOTFOUND ollama.com
+2026-10-14 | mcp__github__merge_pull_request |  | failed to merge pull request: The sha parameter must be exactly 40 characters and contain only [0-9a-f].
