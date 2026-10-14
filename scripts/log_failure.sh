@@ -7,7 +7,7 @@ input=$(cat 2>/dev/null || true)
 line=$(printf '%s' "$input" | jq -r '
   [ (now | strftime("%Y-%m-%d")),
     (.tool_name // "?"),
-    ((.tool_input.command // .tool_input.file_path // .tool_input.url // "") | tostring | .[0:120]),
+    ((.tool_input.command // .tool_input.file_path // .tool_input.url // "") | tostring | gsub("\\s+"; " ") | .[0:120]),
     ((.error // .tool_response.error // .message // "") | tostring | gsub("\\s+"; " ") | .[0:200])
   ] | join(" | ")' 2>/dev/null) || line="$(date +%F) | unparsed failure"
 mkdir -p "$(dirname "$LOG")"

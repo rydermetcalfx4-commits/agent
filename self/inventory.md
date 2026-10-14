@@ -71,15 +71,17 @@ Missing: vite fdfind fzf vips sqlite3 chromium firecrawl yt-dlp gemini codex cur
 - `changelog-generator`: Automatically creates user-facing changelogs from git commits by analyzing commit history, categorizing changes, and transforming technical 
 - `competitive-ads-extractor`: Extracts and analyzes competitors' ads from ad libraries (Facebook, LinkedIn, etc.) to understand what messaging, problems, and creative app
 - `content-research-writer`: Assists in writing high-quality content by conducting research, adding citations, improving hooks, iterating on outlines, and providing real
+- `curate`: Consolidate, archive, and tighten the skill library when it grows past ~30 skills or skills overlap.
 - `developer-growth-analysis`: Analyzes your recent Claude Code chat history to identify coding patterns, development gaps, and areas for improvement, curates relevant lea
 - `domain-name-brainstormer`: Generates creative domain name ideas for your project and checks availability across multiple TLDs (.com, .io, .dev, .ai, etc.). Saves hours
-- `evolve`: Scrape the agent's own environment, diff it against the last generation, fold in lessons learned, and commit a new generation. Trigger words
+- `evolve`: Run one self-improvement generation: scrape self, mine failures and usage, mutate rules/skills, commit. Trigger words: evolve, scrape yourse
 - `file-organizer`: Intelligently organizes your files and folders across your computer by understanding context, finding duplicates, suggesting better structur
 - `image-enhancer`: Improves the quality of images, especially screenshots, by enhancing resolution, sharpness, and clarity. Perfect for preparing images for pr
 - `internal-comms`: A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use 
 - `invoice-organizer`: Automatically organizes invoices and receipts for tax preparation by reading messy files, extracting key information, renaming them consiste
 - `langsmith-fetch`: Debug LangChain and LangGraph agents by fetching execution traces from LangSmith Studio. Use when debugging agent behavior, investigating er
 - `lead-research-assistant`: Identifies high-quality leads for your product or service by analyzing your business, searching for target companies, and providing actionab
+- `learn`: Turn a workflow just completed, a doc URL, a repo, or pasted notes into a reusable skill in .claude/skills.
 - `mcp-builder`: Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-design
 - `meeting-insights-analyzer`: Analyzes meeting transcripts and recordings to uncover behavioral patterns, communication insights, and actionable feedback. Identifies when
 - `raffle-winner-picker`: Picks random winners from lists, spreadsheets, or Google Sheets for giveaways, raffles, and contests. Ensures fair, unbiased selection with 
@@ -91,9 +93,11 @@ Missing: vite fdfind fzf vips sqlite3 chromium firecrawl yt-dlp gemini codex cur
 - `youtube-downloader`: Download YouTube videos with customizable quality and format options. Use this skill when the user asks to download, save, or grab YouTube v
 - `webapp-testing`: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI be
 
+## Project agents (.claude/agents)
+
 ## Catalog (on-demand, not auto-loaded)
 - Composio app playbooks: 832 (use /app-automation)
-- External skill links: 63
+- Full catalog not imported yet (python3 scripts/import_sources.py)
 
 ## MCP servers declared by plugins
 - `playwright`

@@ -5,7 +5,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/scrape_self.sh\" >/dev/null 2>&1; cd \"$CLAUDE_PROJECT_DIR\" && git diff --quiet -- self/inventory.md 2>/dev/null || echo 'self/inventory.md changed since last generation; consider /evolve.'; [ -s memory/failures.log ] && echo \"memory/failures.log has $(wc -l < memory/failures.log) unprocessed failures; consider /evolve.\"; exit 0"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/session_context.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/track_skill.sh\""
           }
         ]
       }

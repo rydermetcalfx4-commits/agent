@@ -52,9 +52,17 @@ missing=()
   echo "## Project skills (.claude/skills)"
   find "$ROOT/.claude/skills" -maxdepth 2 -name SKILL.md 2>/dev/null | sort | while read -r f; do skill_line "$f"; done
   echo
+  echo "## Project agents (.claude/agents)"
+  find "$ROOT/.claude/agents" -name '*.md' 2>/dev/null | sort | sed 's|.*/||; s|\.md$||; s|^|- |'
+  echo
   echo "## Catalog (on-demand, not auto-loaded)"
-  echo "- Composio app playbooks: $(find "$ROOT/catalog/composio" -name '*.md' ! -name INDEX.md 2>/dev/null | wc -l | tr -d ' ') (use /app-automation)"
-  echo "- External skill links: $(grep -c '^- \[' "$ROOT/catalog/external-skills.md" 2>/dev/null || echo 0)"
+  if [ -f "$ROOT/catalog/INDEX.tsv" ]; then
+    tail -n +2 "$ROOT/catalog/INDEX.tsv" | cut -f1,2 | sort | uniq -c | awk '{print "- " $3 " " $2 "s: " $1}'
+    echo "- search: python3 scripts/catalog.py search <terms>"
+  else
+    echo "- Composio app playbooks: $(find "$ROOT/catalog/composio" -name '*.md' ! -name INDEX.md 2>/dev/null | wc -l | tr -d ' ') (use /app-automation)"
+    echo "- Full catalog not imported yet (python3 scripts/import_sources.py)"
+  fi
   echo
   echo "## MCP servers declared by plugins"
   find "$CLAUDE_HOME/plugins/synced" -name .mcp.json 2>/dev/null | sort | while read -r f; do

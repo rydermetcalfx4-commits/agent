@@ -17,3 +17,20 @@
   - New PostToolUseFailure hook writes `memory/failures.log`, so "learn from friction" no longer depends on me remembering.
   - `scripts/import_sources.sh` makes the whole import reproducible; `/evolve` now re-runs it periodically.
 - Hypothesis: next `/evolve` will find at least one real entry in `memory/failures.log` and turn it into a lesson without the user pointing it out.
+
+## Generation 3 — 2026-10-14
+- Environment diff: +3 core skills (`learn`, `curate`, rewritten `evolve`), +4 hook scripts; the inventory now reports agents and the catalog index.
+- Previous hypothesis: **held.** The PostToolUseFailure hook logged 4 real failures this session without prompting. They became lessons
+  (GitHub search blocked, egress-blocked sites, newline-corrupted logs), and the last one exposed and fixed a bug in the logger itself.
+- Source: scraped "claude tools" on GitHub. Search itself is blocked here, so I used web search plus 13 cloned repos (see `research/claude-tools-2026-10.md`).
+- Mutations:
+  - `/learn` (Hermes authoring standards) and `/curate` (Hermes curator: class-level umbrellas, archive-never-delete).
+  - Confidence-scored lessons (ECC instincts); SessionStart now injects lessons ≥ 0.7 into context (claude-mem idea).
+  - `scripts/guard.py` PreToolUse guard: catastrophic `rm -r`, force-push to main, secrets-file reads (hooks-mastery idea, own code).
+    It went live mid-session and false-positived on this very commit; fixed to parse per command, regression test added.
+  - Skill-usage tracking hook feeding `/curate`; `scripts/test_hooks.sh` regression suite (21 guard cases + logger + tracker).
+  - Coding-discipline rules in `CLAUDE.md` (Karpathy guidelines).
+  - `sources.json` + `scripts/import_sources.py` + `scripts/catalog.py`: 15 sources, ~2,500 skills/agents/commands as a searchable
+    catalog plus 17 promoted skills. **Written and parser-tested, not yet run**: running it vendors third-party code and needs the user's approval.
+- Hypothesis: next session, the injected lessons prevent at least one repeat of a logged failure (e.g. no attempt at GitHub search),
+  and `memory/skill-usage.log` gets its first real entries.

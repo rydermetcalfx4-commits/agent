@@ -1,0 +1,143 @@
+{
+  "_doc": "Upstream sources scraped by scripts/import_sources.py. catalog: text-only (.md) copies, searchable via scripts/catalog.py, not auto-loaded. promote: full directories copied into .claude/skills (or .claude/agents). files: individual files copied verbatim. rewrite: literal string replacements applied to promoted files. Revisions are pinned in sources.lock.",
+  "sources": [
+    {
+      "id": "anthropic",
+      "repo": "anthropics/skills",
+      "license": "Apache-2.0 (per-skill LICENSE.txt; docx/pdf/pptx/xlsx are proprietary and excluded)",
+      "catalog": [
+        {"kind": "skill", "glob": "skills/*/SKILL.md", "exclude": ["skills/docx/", "skills/pdf/", "skills/pptx/", "skills/xlsx/"]}
+      ],
+      "promote": [
+        "skills/algorithmic-art", "skills/brand-guidelines", "skills/canvas-design", "skills/doc-coauthoring",
+        "skills/frontend-design", "skills/internal-comms", "skills/mcp-builder", "skills/slack-gif-creator",
+        "skills/theme-factory", "skills/web-artifacts-builder", "skills/webapp-testing"
+      ]
+    },
+    {
+      "id": "composio",
+      "repo": "ComposioHQ/awesome-claude-skills",
+      "license": "Apache-2.0",
+      "catalog": [
+        {"kind": "skill", "glob": "composio-skills/*/SKILL.md", "name_strip": ["-automation"]},
+        {"kind": "skill", "glob": "*/SKILL.md", "exclude": ["document-skills/"]}
+      ],
+      "promote": [
+        "changelog-generator", "competitive-ads-extractor", "content-research-writer", "developer-growth-analysis",
+        "domain-name-brainstormer", "file-organizer", "image-enhancer", "invoice-organizer", "langsmith-fetch",
+        "lead-research-assistant", "meeting-insights-analyzer", "raffle-winner-picker", "skill-share",
+        "tailored-resume-generator", "twitter-algorithm-optimizer", "video-downloader"
+      ],
+      "files": {"template-skill/SKILL.md": "catalog/templates/SKILL.template.md"},
+      "external_index": {"type": "readme", "path": "README.md", "start": "## Skills", "end": "## Getting Started", "out": "catalog/external/awesome-claude-skills.md"}
+    },
+    {
+      "id": "superpowers",
+      "repo": "obra/superpowers",
+      "license": "MIT",
+      "catalog": [{"kind": "skill", "glob": "skills/*/SKILL.md"}],
+      "promote": [
+        "skills/systematic-debugging", "skills/test-driven-development", "skills/verification-before-completion",
+        "skills/receiving-code-review", "skills/writing-plans", "skills/writing-skills"
+      ],
+      "rewrite": {"superpowers:": ""}
+    },
+    {
+      "id": "karpathy",
+      "repo": "forrestchang/andrej-karpathy-skills",
+      "license": "MIT",
+      "catalog": [{"kind": "skill", "glob": "skills/*/SKILL.md"}],
+      "files": {"CLAUDE.md": "catalog/karpathy/CLAUDE.md"}
+    },
+    {
+      "id": "ecc",
+      "repo": "affaan-m/everything-claude-code",
+      "license": "MIT",
+      "catalog": [
+        {"kind": "skill", "glob": "skills/*/SKILL.md"},
+        {"kind": "agent", "glob": "agents/*.md", "exclude": ["agents/README.md"]},
+        {"kind": "command", "glob": "commands/*.md", "exclude": ["commands/README.md"]}
+      ]
+    },
+    {
+      "id": "wshobson",
+      "repo": "wshobson/agents",
+      "license": "MIT",
+      "catalog": [
+        {"kind": "skill", "glob": "plugins/*/skills/*/SKILL.md"},
+        {"kind": "agent", "glob": "plugins/*/agents/*.md"},
+        {"kind": "command", "glob": "plugins/*/commands/*.md"}
+      ]
+    },
+    {
+      "id": "voltagent",
+      "repo": "VoltAgent/awesome-claude-code-subagents",
+      "license": "MIT",
+      "catalog": [{"kind": "agent", "glob": "categories/*/*.md", "exclude": ["/README.md"]}]
+    },
+    {
+      "id": "toolkit",
+      "repo": "rohitg00/awesome-claude-code-toolkit",
+      "license": "Apache-2.0",
+      "catalog": [
+        {"kind": "skill", "glob": "skills/**/SKILL.md"},
+        {"kind": "agent", "glob": "agents/**/*.md", "exclude": ["README.md"]},
+        {"kind": "command", "glob": "commands/**/*.md", "exclude": ["README.md"]}
+      ]
+    },
+    {
+      "id": "hermes",
+      "repo": "NousResearch/hermes-agent",
+      "license": "MIT",
+      "catalog": [
+        {"kind": "skill", "glob": "skills/**/SKILL.md"},
+        {"kind": "skill", "glob": "optional-skills/**/SKILL.md"}
+      ]
+    },
+    {
+      "id": "claude-mem",
+      "repo": "thedotmack/claude-mem",
+      "license": "Apache-2.0",
+      "catalog": [{"kind": "skill", "glob": "plugin/skills/*/SKILL.md"}]
+    },
+    {
+      "id": "ccusage",
+      "repo": "ryoppippi/ccusage",
+      "license": "MIT",
+      "catalog": [{"kind": "skill", "glob": ".agents/skills/*/SKILL.md"}]
+    },
+    {
+      "id": "howto",
+      "repo": "luongnv89/claude-howto",
+      "license": "MIT",
+      "catalog": [
+        {"kind": "skill", "glob": "03-skills/*/SKILL.md"},
+        {"kind": "agent", "glob": "04-subagents/*.md", "exclude": ["README.md"]},
+        {"kind": "command", "glob": "01-slash-commands/*.md", "exclude": ["README.md"]}
+      ]
+    },
+    {
+      "id": "holyclaude",
+      "repo": "CoderLuii/HolyClaude",
+      "license": "MIT",
+      "files": {
+        "scripts/notify.py": "scripts/notify.py",
+        "config/claude-memory-full.md": "holyclaude/environment-full.md",
+        "config/claude-memory-slim.md": "holyclaude/environment-slim.md",
+        "LICENSE": "holyclaude/LICENSE"
+      },
+      "file_rewrite": {"scripts/notify.py": {"FLAG_FILE = \"/home/claude/.claude/notify-on\"": "FLAG_FILE = os.path.expanduser(\"~/.claude/notify-on\")"}}
+    },
+    {
+      "id": "awesome-claude-code",
+      "repo": "hesreallyhim/awesome-claude-code",
+      "license": "CC BY-NC-ND 4.0 (only names, links and categories are indexed; no descriptions copied)",
+      "external_index": {"type": "csv", "path": "THE_RESOURCES_TABLE_NEW.csv", "out": "catalog/external/awesome-claude-code.md"}
+    },
+    {
+      "id": "hooks-mastery",
+      "repo": "disler/claude-code-hooks-mastery",
+      "license": "none published (ideas only, nothing copied)"
+    }
+  ]
+}

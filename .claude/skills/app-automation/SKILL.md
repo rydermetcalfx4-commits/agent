@@ -10,9 +10,9 @@ They're kept out of `.claude/skills/` so 800+ descriptions don't bloat every ses
 
 ## 1. Find the app's playbook
 ```bash
-ls catalog/composio | grep -i '<app>'      # e.g. slack, notion, googlesheets
+ls catalog/composio catalog/composio/skills 2>/dev/null | grep -i '<app>'   # e.g. slack, notion, googlesheets
 ```
-Read `catalog/composio/<app>.md`. It lists the toolkit's workflows, tool slugs, and known pitfalls.
+Read `catalog/composio/<app>.md` (or `catalog/composio/skills/<app>.md` after the v2 importer has run). It lists the toolkit's workflows, tool slugs, and known pitfalls.
 
 ## 2. Make sure Rube MCP is connected
 Check for tools named like `RUBE_SEARCH_TOOLS` (load via ToolSearch with query `rube`).
