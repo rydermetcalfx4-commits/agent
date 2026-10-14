@@ -41,8 +41,10 @@ Missing: vite fdfind fzf vips sqlite3 chromium firecrawl yt-dlp gemini codex cur
 
 ## Plugins (synced)
 - v0001: Browser automation and end-to-end testing MCP server by Microsoft. Enables Claude to interact with web pages, take screenshots, fill forms, click elements, and perform automated browser testing workflows.
+- v0001: Deploy a 2-layer parallel agent hierarchy for large, parallelizable work: big refactors, multi-file migrations, codebase-wide audits, and bulk generation. Pick an army size and power level; includes git checkpoints, a pre-deploy gate, phantom-completion checks, and multi-wave follow-up.
 - v0002: Make your AI agent get stronger with use — skill self-improvement, memory-skill feedback loops, and user profiling. Inspired by Hermes Agent's four-layer memory architecture.
 - v0002: Scrape, search, crawl, and map the web with a single command.
+- v0004: Skills, agents, and workflows for Honeycomb observability — query patterns, production investigations, SLOs, OpenTelemetry instrumentation, and Beeline migration. Designed to complement the Honeycomb MCP server.
 
 ## Plugin skills
 - `build-user-profile`: Build or update the user profile memory by observing workspace context, git history,
@@ -59,6 +61,18 @@ Missing: vite fdfind fzf vips sqlite3 chromium firecrawl yt-dlp gemini codex cur
 - `firecrawl-scrape`: Extract a URL's content as clean markdown, including JS-rendered pages. Use whenever the user provides a URL and wants its content; prefer o
 - `firecrawl-search`: Web search with full page content. Use when no URL is known: finding sources, articles, or news. For papers use firecrawl-research-index; fo
 - `firecrawl`: Any live-web task via the Firecrawl CLI — including ordinary web research: searching the web, reading or extracting pages, gathering sourc
+- `beeline-migration`: Migrating from Honeycomb Beelines (End of Life) to OpenTelemetry. Trigger phrases: migrate from Beelines, upgrade from Beeline to OpenTeleme
+- `create-honeycomb-board`: Design and create a Honeycomb board (dashboard) with queries and SLOs. Trigger phrases: make a board, build a dashboard, create a Honeycomb 
+- `metrics-queries`: Querying OpenTelemetry metrics datasets in Honeycomb, whose rules differ from trace/event datasets: bare COUNT, RATE_SUM, RATE_AVG, RATE_MAX
+- `observability-fundamentals`: First principles of observability: wide events, high cardinality, the core analysis loop, events vs metrics vs logs, and how instrumentation
+- `otel-genai-instrumentation`: Instrumenting GenAI/LLM applications with OpenTelemetry for Honeycomb, including content capture and agent failure detection. Trigger phrase
+- `otel-instrumentation`: OpenTelemetry SDK setup, custom instrumentation, and sending data to Honeycomb. Trigger phrases: instrument my app, add tracing, set up Open
+- `otel-migration`: Retrofitting OpenTelemetry into an existing, uninstrumented application. Trigger phrases: migrate existing app to OTel, add OpenTelemetry to
+- `production-investigation`: Workflows for investigating production issues in Honeycomb: context priming, broad query, BubbleUp, trace analysis, verification, and chaini
+- `query-patterns`: Constructing and interpreting Honeycomb queries on trace, log and event datasets: operation selection (percentiles not AVG, HEATMAP for dist
+- `slos-and-triggers`: Interpreting Honeycomb SLO compliance, burn rates and trigger status, and what to do about them: detecting misconfigured SLIs, freezing depl
+- `verify-recent-trace`: Find a recent trace in Honeycomb, to see what happened in a recent test. Use when asked to verify in Honeycomb, find the most recent trace, 
+- `agent-army`: Deploy a 2-layer parallel agent hierarchy for large, parallelizable work — big refactors, multi-file migrations, codebase-wide audits, bul
 
 ## User skills (~/.claude/skills)
 - `startup-hook-skill`: Creating and developing startup hooks for Claude Code cloud sessions. Use when the user wants to set up a repository for cloud sessions, cre
@@ -102,3 +116,4 @@ Missing: vite fdfind fzf vips sqlite3 chromium firecrawl yt-dlp gemini codex cur
 
 ## MCP servers declared by plugins
 - `playwright`
+- `honeycomb`
