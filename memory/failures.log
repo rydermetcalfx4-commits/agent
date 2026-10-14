@@ -1,1 +1,2 @@
 2026-10-14 | WebFetch | https://ollama.com/blog/claude | getaddrinfo ENOTFOUND ollama.com
+2026-10-14 | mcp__Honeycomb__run_query |  | unknown column or derived column "name" Columns this dataset declares for common attributes — prefer these when a query needs the concept: duration_ms: duration_ms error: error log_message: body log_s
