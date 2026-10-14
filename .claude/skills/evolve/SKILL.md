@@ -9,6 +9,7 @@ One generation = scrape → reflect → mutate → verify → record → commit.
 
 ## 1. Scrape
 ```bash
+python3 scripts/doctor.py                                            # baseline fitness + errors (note the metrics)
 bash scripts/scrape_self.sh && git diff self/inventory.md            # environment change since last generation
 cat memory/failures.log                                              # failed tool calls (hook)
 cut -f2 memory/skill-usage.log 2>/dev/null | sort | uniq -c | sort -rn   # skill usage (hook)
@@ -34,6 +35,8 @@ Never weaken safety, guard, permission, or git rules as a "mutation".
 
 ## 4. Verify
 Run what you changed: `bash scripts/test_hooks.sh` for hooks/guard, the skill's Verification step for skills.
+`python3 scripts/doctor.py` must end `healthy`; compare its metrics with the baseline. A generation that raises
+`skill_description_chars` should have earned it.
 Then empty the processed logs: `: > memory/failures.log`.
 
 ## 5. Record and commit
@@ -42,6 +45,7 @@ Append to `EVOLUTION.md`:
 ## Generation N — YYYY-MM-DD
 - Environment diff: <one line, or "none">
 - Previous hypothesis: <held / failed / untested, with evidence>
+- Fitness: <doctor metrics that moved, before → after>
 - Mutations: <bullets>
 - Hypothesis: <what should be measurably better next time>
 ```

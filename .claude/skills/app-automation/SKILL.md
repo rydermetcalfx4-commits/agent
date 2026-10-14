@@ -1,6 +1,6 @@
 ---
 name: app-automation
-description: "Take real actions in 800+ external apps (Gmail, Slack, Notion, Jira, HubSpot, Stripe, ...) through Composio's Rube MCP. Use when the user wants to send, create, post, or update something in a third-party service rather than draft it."
+description: "Act in external apps (Gmail, Slack, Notion, Jira, Stripe, 800+) via Composio Rube MCP instead of drafting."
 ---
 
 # App automation (Composio / Rube MCP)

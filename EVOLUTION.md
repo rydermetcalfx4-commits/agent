@@ -34,3 +34,17 @@
     catalog plus 17 promoted skills. **Written and parser-tested, not yet run**: running it vendors third-party code and needs the user's approval.
 - Hypothesis: next session, the injected lessons prevent at least one repeat of a logged failure (e.g. no attempt at GitHub search),
   and `memory/skill-usage.log` gets its first real entries.
+
+## Generation 4 — 2026-10-14
+- Environment diff: +1 skill (`integrate-source`), +1 script (`scripts/doctor.py`).
+- Previous hypothesis: untested (no new session since gen 3).
+- Fitness (doctor, first measurement): 29 skills (5 own, 24 vendored), 6,420 description chars loaded per session,
+  15 lessons (12 injected, mean confidence 0.75), 0 unprocessed failures, healthy.
+- Mutations:
+  - Asked to "do whatever will make you grow". The import of third-party skills was blocked a second time by the auto-mode
+    classifier (a vague go-ahead isn't approval of a specific import), so it stays pending; that lesson is now at confidence 1.0.
+  - `/learn` applied to my own history: "scrape a source and integrate it" ran 3 times (gens 2–3), so it became the `integrate-source` skill.
+  - `scripts/doctor.py`: a fitness function for evolution (context cost, lesson health, dangling references, hook integrity).
+    `/evolve` now measures before and after. Its first run found 1 error and 4 warnings, all fixed.
+- Hypothesis: `skill_description_chars` falls in a future generation. Of the 24 bulk-imported skills, those still at zero uses in
+  `memory/skill-usage.log` after 2026-11-13 qualify for `/curate` archiving under its 30-day rule.
