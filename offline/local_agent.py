@@ -13,14 +13,22 @@ Environment:
   AGENT_MODEL     default qwen3:8b                    (any tool-capable model you have pulled)
   AGENT_YES=1     run shell commands without asking (only in a sandbox you trust)
 
+Tracing (optional): with `pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http` and
+OTEL_EXPORTER_OTLP_ENDPOINT set, each turn is traced with OTel GenAI conventions (invoke_agent → chat /
+execute_tool). For Honeycomb: OTEL_EXPORTER_OTLP_ENDPOINT=https://api.honeycomb.io and
+OTEL_EXPORTER_OTLP_HEADERS=x-honeycomb-team=<ingest key>. Prompts and replies are recorded only with
+OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=span_only.
+
 It is the same loop Claude Code runs, stripped to the bone: send messages + tool schemas,
 run whatever tools the model asks for, append the results, repeat until it answers in text.
 It loads lessons from memory/learnings.md (or .evolving-agent/learnings.md), refuses what
 scripts/guard.py refuses, and logs failed tool calls where /evolve will find them.
 """
-import json, os, re, subprocess, sys, urllib.request
+import json, os, re, subprocess, sys, urllib.request, uuid
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path.cwd()
 BASE_URL = os.environ.get("AGENT_BASE_URL", "http://localhost:11434/v1").rstrip("/")
@@ -35,6 +43,69 @@ try:  # reuse the repo's guard when available
 except ImportError:  # running outside this repo
     rm_problem = push_problem = lambda cmd: None
     secret_problem = lambda tool, inp: None
+
+
+# ---- telemetry (optional) ---------------------------------------------------
+CONVERSATION_ID = str(uuid.uuid4())  # one per process: every turn of this session shares it
+CAPTURE = os.environ.get("OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT", "") in ("span_only", "span_and_event", "true")
+CONTENT_LIMIT = 4_000
+
+
+def _tracer():
+    if not os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"):
+        return None, lambda: None
+    try:
+        from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+        from opentelemetry.sdk.resources import Resource
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    except ImportError:
+        print("tracing off: pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http", file=sys.stderr)
+        return None, lambda: None
+    processor = BatchSpanProcessor(OTLPSpanExporter())
+    provider = TracerProvider(resource=Resource.create({"service.name": os.environ.get("OTEL_SERVICE_NAME", "local-agent")}))
+    provider.add_span_processor(processor)
+    return provider.get_tracer("local_agent"), processor.force_flush
+
+
+TRACER, flush_telemetry = _tracer()
+
+
+@contextmanager
+def span(name, kind, attrs):
+    """A GenAI span, or None when tracing is off. Exceptions mark it as an error and propagate."""
+    if not TRACER:
+        yield None
+        return
+    from opentelemetry.trace import SpanKind
+    attrs = {"gen_ai.conversation.id": CONVERSATION_ID, **attrs}
+    with TRACER.start_as_current_span(name, kind=getattr(SpanKind, kind), attributes=attrs) as s:
+        try:
+            yield s
+        except Exception as e:
+            s.set_attribute("error.type", type(e).__name__)
+            raise
+
+
+def fail(s, e):
+    if s:
+        from opentelemetry.trace import Status, StatusCode
+        s.set_attribute("error.type", type(e).__name__)
+        s.set_status(Status(StatusCode.ERROR, str(e)[:200]))
+
+
+def as_otel_messages(messages):
+    """OpenAI-style chat messages → the GenAI semconv role/parts shape, as truncated JSON."""
+    out = []
+    for m in messages:
+        if m["role"] == "tool":
+            parts = [{"type": "tool_call_response", "id": m.get("tool_call_id"), "response": m.get("content")}]
+        else:
+            parts = [{"type": "text", "content": m["content"]}] if m.get("content") else []
+            parts += [{"type": "tool_call", "id": c.get("id"), "name": c["function"]["name"],
+                       "arguments": c["function"].get("arguments")} for c in m.get("tool_calls") or []]
+        out.append({"role": m["role"], "parts": parts})
+    return json.dumps(out)[:CONTENT_LIMIT]
 
 
 # ---- memory -----------------------------------------------------------------
@@ -136,11 +207,39 @@ def chat(messages):
     body = json.dumps({"model": MODEL, "messages": messages, "tools": SCHEMAS, "temperature": 0.2}).encode()
     req = urllib.request.Request(f"{BASE_URL}/chat/completions", body,
                                  {"Content-Type": "application/json", "Authorization": "Bearer local"})
-    with urllib.request.urlopen(req, timeout=600) as r:
-        return json.load(r)["choices"][0]["message"]
+    url = urlparse(BASE_URL)
+    attrs = {"gen_ai.operation.name": "chat", "gen_ai.request.model": MODEL, "gen_ai.request.temperature": 0.2,
+             "server.address": url.hostname or "", "server.port": url.port or (443 if url.scheme == "https" else 80)}
+    if CAPTURE:
+        attrs["gen_ai.input.messages"] = as_otel_messages(messages)
+    with span(f"chat {MODEL}", "CLIENT", attrs) as s:
+        with urllib.request.urlopen(req, timeout=600) as r:
+            data = json.load(r)
+        choice = data["choices"][0]
+        if s:
+            usage = data.get("usage") or {}
+            for key, value in (("gen_ai.response.model", data.get("model")), ("gen_ai.response.id", data.get("id")),
+                               ("gen_ai.usage.input_tokens", usage.get("prompt_tokens")),
+                               ("gen_ai.usage.output_tokens", usage.get("completion_tokens"))):
+                if value is not None:
+                    s.set_attribute(key, value)
+            if choice.get("finish_reason"):
+                s.set_attribute("gen_ai.response.finish_reasons", [choice["finish_reason"]])
+            if CAPTURE:
+                s.set_attribute("gen_ai.output.messages", as_otel_messages([choice["message"]]))
+        return choice["message"]
 
 
 def run_turn(messages, say=print):
+    attrs = {"gen_ai.operation.name": "invoke_agent", "gen_ai.agent.name": "local-agent", "gen_ai.request.model": MODEL}
+    with span("invoke_agent local-agent", "INTERNAL", attrs) as s:
+        answer = _run_turn(messages, say)
+        if s and CAPTURE:
+            s.set_attribute("gen_ai.output.messages", as_otel_messages([{"role": "assistant", "content": answer}]))
+        return answer
+
+
+def _run_turn(messages, say):
     for _ in range(MAX_TURNS):
         msg = chat(messages)
         calls = msg.get("tool_calls") or []
@@ -149,14 +248,21 @@ def run_turn(messages, say=print):
             return msg.get("content") or ""
         for call in calls:
             name = call["function"]["name"]
-            try:
-                args = call["function"].get("arguments") or {}
-                args = json.loads(args) if isinstance(args, str) else args
-                say(f"  → {name}({', '.join(f'{k}={str(v)[:60]!r}' for k, v in args.items())})")
-                result = TOOLS[name](**args)
-            except Exception as e:  # the model sees the error and can recover
-                result = f"ERROR: {type(e).__name__}: {e}"
-                log_failure(name, json.dumps(args if isinstance(args, dict) else {})[:200], result)
+            attrs = {"gen_ai.operation.name": "execute_tool", "gen_ai.tool.name": name, "gen_ai.tool.type": "function",
+                     "gen_ai.tool.call.id": call.get("id", name), "gen_ai.agent.name": "local-agent",
+                     "gen_ai.tool.call.arguments": str(call["function"].get("arguments") or "{}")[:CONTENT_LIMIT]}
+            with span(f"execute_tool {name}", "INTERNAL", attrs) as s:
+                try:
+                    args = call["function"].get("arguments") or {}
+                    args = json.loads(args) if isinstance(args, str) else args
+                    say(f"  → {name}({', '.join(f'{k}={str(v)[:60]!r}' for k, v in args.items())})")
+                    result = TOOLS[name](**args)
+                except Exception as e:  # the model sees the error and can recover
+                    result = f"ERROR: {type(e).__name__}: {e}"
+                    log_failure(name, json.dumps(args if isinstance(args, dict) else {})[:200], result)
+                    fail(s, e)
+                if s:
+                    s.set_attribute("gen_ai.tool.call.result", str(result)[:CONTENT_LIMIT])
             messages.append({"role": "tool", "tool_call_id": call.get("id", name), "name": name, "content": str(result)})
     return "(stopped: too many tool calls in one turn)"
 
@@ -174,6 +280,8 @@ def main():
             print("\n" + run_turn(messages))
         except OSError as e:
             sys.exit(f"cannot reach {BASE_URL} ({e}). Is the model server running? e.g. `ollama serve`")
+        finally:
+            flush_telemetry()  # short CLI runs exit before the batch exporter's timer fires
 
 
 if __name__ == "__main__":
