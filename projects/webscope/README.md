@@ -26,20 +26,41 @@ plug-and-play. `nmap` and `nuclei` are used automatically *if present* (with
 
 ## Usage
 
-```bash
-# 1. Define your scope (the safety core — the tool never acts outside it)
-cp scope.example.yaml scope.yaml
-$EDITOR scope.yaml
+### Quick start — one command
 
-# 2. Run
-python3 webscope.py \
-    --target https://app.example.com \
+```bash
+python3 webscope.py app.example.com
+```
+
+That's it. The scheme defaults to `https://`, the scope auto-limits to exactly
+that host, and your git/OS identity is recorded as the authorizer. It shows you
+the target + scope and asks you to confirm you're authorized, then runs and
+writes `webscope-report.json` / `webscope-report.md`.
+
+### Multi-host / full control
+
+For more than one host, subdomains, or CIDR ranges, use a scope file:
+
+```bash
+cp scope.example.yaml scope.yaml
+$EDITOR scope.yaml                       # list the hosts/ranges you're authorized to test
+
+python3 webscope.py https://app.example.com \
     --scope scope.yaml \
     --authorized-by "Jane Client <jane@example.com>" \
     --engagement "SOW-2026-014" \
     --out report \
-    --tools            # optional: also run nmap/nuclei if installed
+    --tools                              # optional: also run nmap/nuclei if installed
 ```
+
+### CI / unattended
+
+```bash
+python3 webscope.py app.example.com --yes --authorized-by "ci@example.com"
+```
+
+`--yes` skips the interactive confirmation but *requires* an explicit
+`--authorized-by`, so unattended use stays deliberate.
 
 Outputs `report.json` (machine-readable) and `report.md` (human-readable).
 
@@ -47,9 +68,9 @@ Outputs `report.json` (machine-readable) and `report.md` (human-readable).
 
 | Flag | Meaning |
 | --- | --- |
-| `--target` | Base URL (must include scheme), e.g. `https://app.example.com` |
-| `--scope` | Path to the allowlist file (required) |
-| `--authorized-by` | Who authorized the engagement (recorded in the report) |
+| `target` | Base URL or bare host (positional); scheme defaults to `https://` |
+| `--scope` | Path to the allowlist file. Omit to auto-scope to the target host only |
+| `--authorized-by` | Who authorized the engagement (defaults to your git/OS identity) |
 | `--engagement` | SOW / ticket reference (recorded in the report) |
 | `--out` | Output path prefix (default `webscope-report`) |
 | `--rate` | Max requests/second (default 5) |

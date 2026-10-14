@@ -469,51 +469,101 @@ def write_reports(report: Report, out_prefix: str) -> tuple[str, str]:
 # --------------------------------------------------------------------------- #
 # CLI
 # --------------------------------------------------------------------------- #
+def _default_authorizer() -> str:
+    """Best-effort identity for the --authorized-by record (git, then OS user)."""
+    try:
+        name = subprocess.run(
+            ["git", "config", "user.name"], capture_output=True, text=True, timeout=3, check=False
+        ).stdout.strip()
+        email = subprocess.run(
+            ["git", "config", "user.email"], capture_output=True, text=True, timeout=3, check=False
+        ).stdout.strip()
+        if name and email:
+            return f"{name} <{email}>"
+        if name:
+            return name
+    except OSError:
+        pass
+    return os.environ.get("USER") or os.environ.get("USERNAME") or "unspecified"
+
+
+def _normalize_target(raw: str) -> str:
+    """Accept bare hosts; default to https:// so `webscope.py app.example.com` works."""
+    if "://" not in raw:
+        return "https://" + raw
+    return raw
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(
+        prog="webscope.py",
         description="Authorized web-app assessment orchestrator (read-only).",
-        epilog="Only run against systems you own or are authorized to test.",
+        epilog=(
+            "Quick start:  python3 webscope.py https://app.example.com\n"
+            "Only run against systems you own or are authorized to test."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument("--target", required=True, help="Base URL, e.g. https://app.example.com")
-    p.add_argument("--scope", required=True, help="Path to scope allowlist file")
-    p.add_argument("--authorized-by", required=True, help="Who authorized this engagement")
+    p.add_argument("target", nargs="?", help="Base URL or host, e.g. https://app.example.com")
+    p.add_argument("--target", dest="target_flag", help=argparse.SUPPRESS)
+    p.add_argument("--scope", help="Scope allowlist file. Omit to auto-scope to the target host only.")
+    p.add_argument("--authorized-by", help="Who authorized this engagement (defaults to your git/OS identity)")
     p.add_argument("--engagement", default="(unspecified)", help="Engagement / SOW reference")
     p.add_argument("--out", default="webscope-report", help="Output path prefix")
     p.add_argument("--rate", type=float, default=5.0, help="Max requests/second (default 5)")
     p.add_argument("--timeout", type=float, default=15.0, help="Per-request timeout seconds")
     p.add_argument("--tools", action="store_true", help="Also run nmap/nuclei if installed")
-    p.add_argument("--yes", action="store_true", help="Skip the interactive authorization confirmation")
+    p.add_argument("--yes", action="store_true", help="Skip the interactive authorization confirmation (CI)")
     return p.parse_args(argv)
 
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = parse_args(argv if argv is not None else sys.argv[1:])
 
-    host = urlparse(args.target).hostname
+    raw_target = args.target or args.target_flag
+    if not raw_target:
+        print("error: give a target, e.g.  python3 webscope.py https://app.example.com", file=sys.stderr)
+        return 2
+    target = _normalize_target(raw_target)
+    host = urlparse(target).hostname
     if not host:
-        print(f"error: --target must be a full URL with a scheme; got {args.target!r}", file=sys.stderr)
-        return 2
-    if not os.path.exists(args.scope):
-        print(f"error: scope file not found: {args.scope}", file=sys.stderr)
+        print(f"error: could not parse a host from {raw_target!r}", file=sys.stderr)
         return 2
 
-    scope = Scope.from_file(args.scope)
-    if scope.is_empty():
-        print("error: scope allowlist is empty — refusing to run.", file=sys.stderr)
-        return 2
-    if not scope.allows_host(host):
-        print(f"error: target host {host!r} is NOT in the scope allowlist — refusing to run.", file=sys.stderr)
-        print(f"       scope: {', '.join(scope.as_list())}", file=sys.stderr)
-        return 2
+    # Scope: explicit file, or auto-scope to just the target host.
+    auto_scoped = False
+    if args.scope:
+        if not os.path.exists(args.scope):
+            print(f"error: scope file not found: {args.scope}", file=sys.stderr)
+            return 2
+        scope = Scope.from_file(args.scope)
+        if scope.is_empty():
+            print("error: scope allowlist is empty — refusing to run.", file=sys.stderr)
+            return 2
+        if not scope.allows_host(host):
+            print(f"error: target host {host!r} is NOT in the scope allowlist — refusing to run.", file=sys.stderr)
+            print(f"       scope: {', '.join(scope.as_list())}", file=sys.stderr)
+            return 2
+    else:
+        scope = Scope([host])
+        auto_scoped = True
 
-    if not args.yes:
+    authorized_by = args.authorized_by or _default_authorizer()
+
+    # The confirmation prompt is the authorization gate. In non-interactive
+    # (--yes) runs, require an explicit --authorized-by so CI use is deliberate.
+    if args.yes:
+        if not args.authorized_by:
+            print("error: --yes requires an explicit --authorized-by.", file=sys.stderr)
+            return 2
+    else:
         print("You are about to run an authorized assessment against:")
-        print(f"  target     : {args.target}")
-        print(f"  scope      : {', '.join(scope.as_list())}")
-        print(f"  authorized : {args.authorized_by}")
+        print(f"  target     : {target}")
+        print(f"  scope      : {', '.join(scope.as_list())}" + ("  (auto-scoped to target host)" if auto_scoped else ""))
+        print(f"  authorized : {authorized_by}")
         print(f"  engagement : {args.engagement}")
         try:
-            ans = input("Confirm you are authorized to test this target [yes/NO]: ").strip().lower()
+            ans = input("Confirm you own or are authorized to test this target [yes/NO]: ").strip().lower()
         except EOFError:
             ans = ""
         if ans not in ("y", "yes"):
@@ -521,24 +571,24 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 1
 
     report = Report(
-        target=args.target,
-        authorized_by=args.authorized_by,
+        target=target,
+        authorized_by=authorized_by,
         engagement=args.engagement,
         started_at=_utcnow().isoformat(),
         scope=scope.as_list(),
     )
     client = Client(scope, report, rate=args.rate, timeout=args.timeout)
 
-    print(f"[*] Assessing {args.target} ...")
+    print(f"[*] Assessing {target} ...")
     try:
-        headers = check_reachability(client, report, args.target)
-        check_tls(report, args.target, args.timeout)
+        headers = check_reachability(client, report, target)
+        check_tls(report, target, args.timeout)
         if headers is not None:
             check_security_headers(report, headers)
             check_cookies(report, headers)
             check_info_disclosure(report, headers)
-            check_sensitive_paths(client, report, args.target)
-        run_optional_tools(report, args.target, scope, args.tools)
+            check_sensitive_paths(client, report, target)
+        run_optional_tools(report, target, scope, args.tools)
     except ScopeError as e:
         print(f"[!] {e}", file=sys.stderr)
         return 3
