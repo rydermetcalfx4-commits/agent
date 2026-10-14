@@ -24,6 +24,28 @@ Python 3.9+. **No third-party packages** — standard library only, so it's
 plug-and-play. `nmap` and `nuclei` are used automatically *if present* (with
 `--tools`), and silently skipped if not.
 
+## Install
+
+**One-line install** (drops `webscope` on your PATH, no sudo):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rydermetcalfx4-commits/agent/main/projects/webscope/install.sh | bash
+webscope app.example.com
+```
+
+> Until PR #1 is merged, install from the branch instead:
+> `curl -fsSL https://raw.githubusercontent.com/rydermetcalfx4-commits/agent/claude/wizardly-heisenberg-4x8g7x/projects/webscope/install.sh | WEBSCOPE_REF=claude/wizardly-heisenberg-4x8g7x bash`
+
+**Or grab the single file and run it** (nothing installed):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rydermetcalfx4-commits/agent/main/projects/webscope/webscope.py -o webscope.py
+python3 webscope.py app.example.com
+```
+
+(As always, pipe-to-shell runs code from the internet — the one file is small;
+read it first if you like.)
+
 ## Usage
 
 ### Quick start — one command
