@@ -6,6 +6,7 @@ Keep under 60 lines; merge or drop stale ones. (Confidence model from ECC contin
 
 - [0.5] 2026-10-14 — The SessionStart inventory scrape can run before synced plugins land, leaving the plugin sections empty; rerun `scripts/scrape_self.sh` before committing self/inventory.md.
 - [0.5] 2026-10-14 — Plugin-declared remote MCP servers (e.g. Honeycomb) can fail with a proxy 403 in cloud sessions while the same service's claude.ai connector (`mcp__Honeycomb__*`) works; use the connector. A user-scope `claude plugin install` dies with the container.
+- [0.6] 2026-10-14 — For knowledge gathering, web-search comparison pages contradict each other (stars, prices); clone the primary repo instead. anthropics/claude-cookbooks `registry.yaml` indexes every recipe.
 - [0.6] 2026-10-14 — Model weights can't be fetched in cloud sessions (huggingface.co, ollama.com, GitHub releases blocked; PyPI works). Test model-facing code against a scripted fake server instead.
 - [0.7] 2026-10-14 — Mod API: one unmatched hook per event (merge guard + logger), `$` op hooks answer `{ value }` / `{ deny }`, the engine passes absolute paths, and the test `$` takes full event inputs. Validate, tsc, and `claude plugin test` before shipping.
 - [0.7] 2026-10-14 — Run `python3 scripts/doctor.py` after any change to skills, lessons, or hooks; it caught a dangling reference in a brand-new skill.
