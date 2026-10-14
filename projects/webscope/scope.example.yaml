@@ -1,0 +1,13 @@
+# webscope allowlist — ONLY list hosts/ranges you own or are authorized to test.
+# One entry per line. The tool refuses to send a single request outside this list.
+#
+# Supported forms:
+#   example.com        exact host
+#   *.example.com      the host and any subdomain
+#   10.0.0.0/24        CIDR range (matched against the target's resolved IPs)
+#
+# A leading "- " (YAML list style) is fine; so are quotes.
+scope:
+  - app.example.com
+  - "*.staging.example.com"
+  # - 203.0.113.0/24
