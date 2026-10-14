@@ -1,0 +1,14 @@
+{
+  "name": "evolving-agent",
+  "owner": {
+    "name": "rydermetcalfx4-commits"
+  },
+  "description": "A self-evolving Claude Code agent, packaged as an installable mod.",
+  "plugins": [
+    {
+      "name": "evolving-agent",
+      "source": "./mods/evolving-agent",
+      "description": "Self-evolving agent: learns from failures, injects lessons every session, guards destructive commands, evolves via skills."
+    }
+  ]
+}

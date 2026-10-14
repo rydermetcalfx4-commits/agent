@@ -12,6 +12,8 @@ loads these files, so improving them improves the next me.
 - `catalog/` — on-demand knowledge, never auto-loaded: third-party skills/agents/commands (`python3 scripts/catalog.py search …`),
   Composio app playbooks (`/app-automation`), external link indexes.
 - `sources.json` / `sources.lock` / `scripts/import_sources.py` — upstream sources, pinned revisions, and the importer. `THIRD_PARTY.md` — provenance.
+- `mods/evolving-agent/` — this agent cloned as an installable Claude Code mod (TypeScript hooks + skills); `.claude-plugin/marketplace.json`
+  makes the repo its marketplace. Keep it in sync when the core loop changes; test with `claude plugin test mods/evolving-agent`.
 - `research/` — notes from scraping the ecosystem. `holyclaude/` — run this repo in the HolyClaude Docker workstation.
 - `EVOLUTION.md` — generation log with a falsifiable hypothesis per generation.
 

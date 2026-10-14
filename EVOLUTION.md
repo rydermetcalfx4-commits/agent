@@ -48,3 +48,16 @@
     `/evolve` now measures before and after. Its first run found 1 error and 4 warnings, all fixed.
 - Hypothesis: `skill_description_chars` falls in a future generation. Of the 24 bulk-imported skills, those still at zero uses in
   `memory/skill-usage.log` after 2026-11-13 qualify for `/curate` archiving under its 30-day rule.
+
+## Generation 5 — 2026-10-14
+- Environment diff: +`mods/evolving-agent` (installable mod), +`.claude-plugin/marketplace.json`.
+- Previous hypothesis: untested (still within the same session; the November curate check hasn't come due).
+- Fitness: doctor healthy; the mod has 24/24 tests passing, validates, and type-checks.
+- Mutations:
+  - Cloned the agent into a mod so it can live in any project, not just this repo. The bash/python hooks became one TypeScript module:
+    session start seeds `.evolving-agent/` memory, `prompt.compose` injects rules and lessons ≥ 0.7, a single `tool.call`
+    hook guards (fails closed) then logs failures and skill use, and `/agent-status` reports fitness.
+  - Skills `evolve`, `learn`, `curate`, `integrate-source` rewritten to be project-agnostic (no repo scripts needed).
+  - Portable lessons seeded into the mod's template; repo-specific ones left behind.
+- Hypothesis: installed in a second project, the mod produces a non-empty `.evolving-agent/failures.log` within its first real
+  session, and that project's first `/evolve` turns it into a lesson.

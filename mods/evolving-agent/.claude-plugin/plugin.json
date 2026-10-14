@@ -1,0 +1,6 @@
+{
+  "name": "evolving-agent",
+  "version": "0.1.0",
+  "author": { "name": "rydermetcalfx4-commits" },
+  "description": "Self-evolving agent: learns lessons from failures, injects them every session, guards destructive commands, and evolves via /evolve, /learn, /curate."
+}

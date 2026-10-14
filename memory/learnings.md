@@ -4,6 +4,7 @@ Format: `- [confidence] YYYY-MM-DD — lesson`. Confidence 0.3 tentative … 0.9
 Re-observed → +0.1; contradicted → −0.2; below 0.3 → drop. Lessons at ≥ 0.7 are injected at session start.
 Keep under 60 lines; merge or drop stale ones. (Confidence model from ECC continuous-learning-v2.)
 
+- [0.7] 2026-10-14 — Mod API: one unmatched hook per event (merge guard + logger), `$` op hooks answer `{ value }` / `{ deny }`, the engine passes absolute paths, and the test `$` takes full event inputs. Validate, tsc, and `claude plugin test` before shipping.
 - [0.7] 2026-10-14 — Run `python3 scripts/doctor.py` after any change to skills, lessons, or hooks; it caught a dangling reference in a brand-new skill.
 - [0.8] 2026-10-14 — Guards must parse commands per segment and skip heredocs/messages; grepping the whole string blocked my own commit (prose mentioned `.env`). Hook edits to .claude/settings.json can take effect mid-session.
 - [0.9] 2026-10-14 — GitHub search (web and API) is blocked in cloud sessions; discover repos via WebSearch, then `git clone --depth 1` (public clones work).
