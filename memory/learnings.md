@@ -22,3 +22,4 @@ Keep under 60 lines; merge or drop stale ones. (Confidence model from ECC contin
 - [0.7] 2026-10-13 — Playwright MCP is available and Chromium is preinstalled at /opt/pw-browsers; never run `playwright install`.
 - [0.6] 2026-10-13 — Skill frontmatter descriptions can contain escaped quotes, literal `\n`, and YAML `>` blocks; parse all three.
 - [0.9] 2026-10-13 — Cloud containers are ephemeral: anything learned must be committed and pushed, or it's lost.
+- [0.6] 2026-11-06 — The SessionStart inventory scrape can run before plugins sync and write empty plugin sections; rerun `scripts/scrape_self.sh` before committing self/inventory.md.
