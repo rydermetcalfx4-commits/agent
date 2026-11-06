@@ -23,3 +23,4 @@ Keep under 60 lines; merge or drop stale ones. (Confidence model from ECC contin
 - [0.6] 2026-10-13 — Skill frontmatter descriptions can contain escaped quotes, literal `\n`, and YAML `>` blocks; parse all three.
 - [0.9] 2026-10-13 — Cloud containers are ephemeral: anything learned must be committed and pushed, or it's lost.
 - [0.6] 2026-11-06 — The SessionStart inventory scrape can run before plugins sync and write empty plugin sections; rerun `scripts/scrape_self.sh` before committing self/inventory.md.
+- [0.8] 2026-11-06 — No Anthropic API key in cloud sessions, and request_credential refuses api.anthropic.com; use `claude -p --tools "" --output-format json` as an eval/promptfoo provider, and treat `stop_reason: "refusal"` (exit 1, empty stderr in text mode) as a blocked reply, not an error.
